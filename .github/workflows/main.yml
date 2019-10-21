@@ -8,5 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
     - name: build server
       run: docker build -t wechat .
