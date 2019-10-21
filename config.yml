@@ -1,0 +1,9 @@
+instagram:
+  username: xxx
+  password: xxx
+
+wechat:
+  token: xxx
+  apiId: xxx
+  secret: xxx
+  encodingAESKey: xxx
