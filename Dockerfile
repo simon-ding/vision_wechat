@@ -1,4 +1,6 @@
 FROM golang:1.13-alpine AS build_base
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories &&\
+    apk add gcc g++
 
 WORKDIR /wechat/
 
@@ -9,7 +11,6 @@ COPY go.sum .
 
 RUN go mod download
 COPY . .
-
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build  -a -ldflags '-extldflags "-static"' -o ./cmd/server .
 
 FROM alpine AS server
