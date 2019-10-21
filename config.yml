@@ -2,10 +2,6 @@ server:
   port: 8080
   dataDir: ./data
 
-instagram:
-  username: xxx
-  password: xxx
-
 wechat:
   token: xxx
   apiId: xxx

@@ -23,10 +23,6 @@ func init() {
 }
 
 type Config struct {
-	Instagram struct {
-		Username string
-		Password string
-	}
 	Wechat struct {
 		Token          string
 		AppId          string
@@ -35,7 +31,8 @@ type Config struct {
 	}
 
 	Server struct {
-		Port string
+		Port    string
+		DataDir string
 	}
 }
 

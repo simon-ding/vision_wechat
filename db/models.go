@@ -42,6 +42,7 @@ func (d *DB) GetInstagram(openID string) Account {
 	d.db.Where("user_id = ?", openID).Where("name = ?", "instagram").First(&ins)
 	if ins.ID == 0 {
 		logrus.Errorf("no instagram account for user id %s", openID)
+		d.db.Create(&Account{UserID: openID})
 	}
 	return ins
 }
