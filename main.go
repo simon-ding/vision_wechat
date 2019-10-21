@@ -98,15 +98,15 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 		imgURL := msg.PicURL
 		resp, err := http.Get(imgURL)
 		if err != nil {
-			logrus.Error(err)
+			logrus.Error("download pic error: ", err)
 			text := fmt.Sprintf("上传失败 %s", err)
 			return &message.Reply{MsgType: message.MsgTypeText, MsgData: text}
 		}
 		insAccount := db.GetInstagram(msg.FromUserName)
 		insta := goinsta.New(insAccount.Username, insAccount.Password)
-		_, err = insta.UploadPhoto(resp.Body, "", 100, 0)
+		_, err = insta.UploadPhoto(resp.Body, "11", 100, 0)
 		if err != nil {
-			logrus.Error(err)
+			logrus.Error("upload to instagram error", err)
 			text := fmt.Sprintf("上传失败 %s", err)
 			return &message.Reply{MsgType: message.MsgTypeText, MsgData: text}
 		}
