@@ -3,7 +3,7 @@ module vision_wechat
 go 1.13
 
 require (
-	github.com/ahmdrz/goinsta/v2 v2.4.4 // indirect
+	github.com/ahmdrz/goinsta/v2 v2.4.5-0.20191021103459-79702a8f3eda // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/jinzhu/gorm v1.9.11

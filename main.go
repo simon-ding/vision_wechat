@@ -90,8 +90,7 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 	switch msg.MsgType {
 	//文本消息
 	case message.MsgTypeText:
-		text := message.NewText(msg.Content)
-		return &message.Reply{MsgType: message.MsgTypeText, MsgData: text}
+		return textReturn(msg.Content)
 
 		//图片消息
 	case message.MsgTypeImage:
@@ -99,22 +98,22 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 		resp, err := http.Get(imgURL)
 		if err != nil {
 			logrus.Error("download pic error: ", err)
-			return &message.Reply{MsgType: message.MsgTypeText, MsgData: "上传失败 instagram 失败！"}
+			return textReturn("上传失败 instagram 失败！")
 		}
 		insAccount := db.GetInstagram(msg.FromUserName)
 		insta := goinsta.New(insAccount.Username, insAccount.Password)
 		err = insta.Login()
 		if err != nil {
 			logrus.Error("login to instagram fail: ", err)
-			return &message.Reply{MsgType: message.MsgTypeText, MsgData: "上传失败 instagram 失败！"}
+			return textReturn("上传失败 instagram 失败！")
 		}
 		defer insta.Logout()
 		_, err = insta.UploadPhoto(resp.Body, "11", 100, 0)
 		if err != nil {
 			logrus.Error("upload to instagram error, ", err)
-			return &message.Reply{MsgType: message.MsgTypeText, MsgData: "上传失败 instagram 失败！"}
+			return textReturn("上传失败 instagram 失败！")
 		}
-		return &message.Reply{MsgType: message.MsgTypeText, MsgData: "上传成功！"}
+		return textReturn("上传成功！")
 
 		//语音消息
 	case message.MsgTypeVoice:
@@ -141,4 +140,9 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 
 	}
 	return nil
+}
+
+func textReturn(content string) *message.Reply {
+	text := message.NewText(content)
+	return &message.Reply{MsgType: message.MsgTypeText, MsgData: text}
 }
