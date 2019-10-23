@@ -7,3 +7,6 @@ wechat:
   apiId: xxx
   secret: xxx
   encodingAESKey: xxx
+
+scheduler:
+  500px: 30m

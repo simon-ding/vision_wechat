@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ahmdrz/goinsta/v2"
+	"github.com/robfig/cron/v3"
 	"github.com/silenceper/wechat"
 	"github.com/silenceper/wechat/cache"
 	"github.com/silenceper/wechat/message"
@@ -10,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	db2 "vision_wechat/db"
+	"vision_wechat/px500"
 )
 
 func init() {
@@ -34,19 +36,21 @@ type Config struct {
 		Port    string
 		DataDir string
 	}
+	Scheduler struct {
+		Px500 string `json:"500px"`
+	}
 }
 
 var wc *wechat.Wechat
-var db *db2.DB
 
 func main() {
 	var config *Config
 	if err := viper.Unmarshal(&config); err != nil {
 		logrus.Panic(err)
 	}
-	db = db2.NewConnection()
-	defer db.Close()
-	db.Migrate()
+	db2.DefaultDB.Migrate()
+
+	scheduledTasks(config)
 
 	memCache := cache.NewMemory()
 	wcConfig := &wechat.Config{
@@ -66,6 +70,13 @@ func main() {
 		fmt.Printf("start server error , err=%v", err)
 	}
 
+}
+
+func scheduledTasks(config *Config) {
+	cr := cron.New()
+	cr.AddFunc("@every "+config.Scheduler.Px500, px500.Heart500px)
+
+	cr.Start()
 }
 
 func handler(writer http.ResponseWriter, request *http.Request) {
@@ -100,7 +111,7 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 			logrus.Error("download pic error: ", err)
 			return textReturn("上传失败 instagram 失败！")
 		}
-		insAccount := db.GetInstagram(msg.FromUserName)
+		insAccount := db2.DefaultDB.GetInstagram(msg.FromUserName)
 		insta := goinsta.New(insAccount.Username, insAccount.Password)
 		err = insta.Login()
 		if err != nil {

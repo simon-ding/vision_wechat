@@ -23,6 +23,8 @@ type DB struct {
 	db *gorm.DB
 }
 
+var DefaultDB = NewConnection()
+
 func NewConnection() *DB {
 	dataDir := viper.GetString("server.dataDir")
 	dataDir = path.Join(dataDir, "wechat.db")
@@ -45,6 +47,12 @@ func (d *DB) GetInstagram(openID string) Account {
 		d.db.Create(&Account{UserID: openID})
 	}
 	return ins
+}
+
+func (d *DB) GetAll500px() []Account {
+	var px []Account
+	d.db.Where("name = ?", "500px").Find(&px)
+	return px
 }
 
 func (d *DB) Migrate() {
