@@ -23,16 +23,16 @@ type DB struct {
 	db *gorm.DB
 }
 
-var DefaultDB = NewConnection()
+var DefaultDB *DB
 
-func NewConnection() *DB {
+func InitConnection() {
 	dataDir := viper.GetString("server.dataDir")
 	dataDir = path.Join(dataDir, "wechat.db")
 	db, err := gorm.Open("sqlite3", dataDir)
 	if err != nil {
 		panic("failed to connect database")
 	}
-	return &DB{db: db}
+	DefaultDB = &DB{db: db}
 }
 
 func (d *DB) Close() error {

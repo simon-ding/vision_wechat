@@ -37,7 +37,7 @@ type Config struct {
 		DataDir string
 	}
 	Scheduler struct {
-		Px500 string `json:"500px"`
+		Px500 string
 	}
 }
 
@@ -48,6 +48,7 @@ func main() {
 	if err := viper.Unmarshal(&config); err != nil {
 		logrus.Panic(err)
 	}
+	db2.InitConnection()
 	db2.DefaultDB.Migrate()
 
 	scheduledTasks(config)

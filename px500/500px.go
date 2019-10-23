@@ -23,6 +23,7 @@ type Data struct {
 }
 
 func Heart500px() {
+	logrus.Info("500px scheduler begins")
 	accounts := db.DefaultDB.GetAll500px()
 	for _, account := range accounts {
 		logrus.Info("do heart for account ", account.UserID)
