@@ -14,12 +14,12 @@ var client = http.DefaultClient
 const url500px = "https://500px.me"
 
 type mainPage struct {
-	Data []Data `json:data`
+	Data []Data `json:"data"`
 }
 
 type Data struct {
-	ID         string `json:id`
-	UploaderID string `json:uploaderId`
+	ID         string `json:"id"`
+	UploaderID string `json:"uploaderId"`
 }
 
 func Heart500px() {
