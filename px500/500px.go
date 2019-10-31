@@ -24,11 +24,13 @@ func Heart500px() {
 			logrus.Error(err)
 			continue
 		}
-		for _, item := range page.Data {
-			err := client.DoLike(item.ID, item.UploaderID)
+		for _, photo := range page.Data {
+			err := client.DoLike(photo.ID, photo.UploaderID)
 			if err != nil {
 				logrus.Error(err)
+				continue
 			}
+			logrus.Infof("成功点赞了 %s 的作品 %s", photo.UploaderInfo.NickName, photo.Title)
 			time.Sleep(5 * time.Second)
 		}
 	}

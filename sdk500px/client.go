@@ -28,10 +28,19 @@ func NewClientUseCookie(cookie string) *Client {
 }
 
 type Page struct {
-	Data []struct {
-		ID         string `json:"id"`
-		UploaderID string `json:"uploaderId"`
-	}
+	Data    []photoData
+	Message string
+	Status  string
+}
+type uploaderInfo struct {
+	NickName string `json:"nickName"`
+}
+
+type photoData struct {
+	ID           string `json:"id"`
+	UploaderID   string `json:"uploaderId"`
+	Title        string
+	UploaderInfo uploaderInfo `json:"uploaderInfo"`
 }
 
 type Response struct {
@@ -75,9 +84,12 @@ func (c *Client) GetPage(page int, size int) (*Page, error) {
 	}
 	var page1 Page
 
-	err = jsoniter.Unmarshal(data, &page)
+	err = jsoniter.Unmarshal(data, &page1)
 	if err != nil {
 		return nil, err
+	}
+	if page1.Status != "200" {
+		return nil, fmt.Errorf("%s", page1.Message)
 	}
 	return &page1, nil
 }
