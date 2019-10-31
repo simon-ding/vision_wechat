@@ -9,8 +9,8 @@ import (
 )
 
 func Px500Scheduler() {
-	ReplyComments()
 	Heart500px()
+	ReplyComments()
 }
 
 func Heart500px() {
@@ -29,6 +29,7 @@ func Heart500px() {
 			if err != nil {
 				logrus.Error(err)
 			}
+			time.Sleep(5 * time.Second)
 		}
 	}
 }
