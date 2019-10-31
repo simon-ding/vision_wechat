@@ -1,6 +1,7 @@
 package sdk500px
 
 import (
+	"fmt"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -31,6 +32,23 @@ type Page struct {
 		ID         string `json:"id"`
 		UploaderID string `json:"uploaderId"`
 	}
+}
+
+type Response struct {
+	Data    interface{}
+	Message string
+	Status  string
+}
+
+func (c *Client) OwnerID() string {
+	header := http.Header{}
+	header.Add("Cookie", c.Cookie)
+	req := http.Request{Header: header}
+	userId, err := req.Cookie("userId")
+	if err != nil {
+		logrus.Error(err)
+	}
+	return userId.Value
 }
 
 func (c *Client) GetPage(page int, size int) (*Page, error) {
@@ -81,7 +99,11 @@ func (c *Client) DoLike(id, uploadID string) error {
 		return err
 	}
 	data, _ := ioutil.ReadAll(resp.Body)
-	logrus.Info(string(data))
+	var res Response
+	_ = jsoniter.Unmarshal(data, &res)
+	if res.Status != "200" {
+		return fmt.Errorf("%s", res.Message)
+	}
 	return nil
 }
 

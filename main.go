@@ -62,7 +62,7 @@ func main() {
 
 func scheduledTasks(config *Config) {
 	cr := cron.New()
-	cr.AddFunc("@every "+config.Scheduler.Px500, px500.Heart500px)
+	cr.AddFunc("@every "+config.Scheduler.Px500, px500.Px500Scheduler)
 
 	cr.Start()
 }
