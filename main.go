@@ -12,13 +12,13 @@ import (
 )
 
 func init() {
+	logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true, FullTimestamp: true})
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("/wechat")
 	if err := viper.ReadInConfig(); err != nil {
 		logrus.Panic(err)
 	}
-
 }
 
 type Config struct {
