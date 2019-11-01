@@ -55,7 +55,7 @@ func (d *DB) GetAll500px() []Account {
 	return px
 }
 func (d *DB) Set500pxCookie(openID string, cookie string) {
-	d.db.Model(&Account{}).Where("name = ?", openID).Update("cookie", cookie)
+	d.db.Model(&Account{}).Where("name = ?", "500px").Where("user_id = ?", openID).Update("cookie", cookie)
 }
 
 func (d *DB) Migrate() {
