@@ -2,16 +2,12 @@ package px500
 
 import (
 	"github.com/sirupsen/logrus"
+	"math/rand"
 	"time"
 	"vision_wechat/db"
 	"vision_wechat/sdk500px"
 	"vision_wechat/utils"
 )
-
-func Px500Scheduler() {
-	Heart500px()
-	ReplyComments()
-}
 
 func Heart500px() {
 	logrus.Info("500px scheduler begins")
@@ -45,6 +41,8 @@ var flutteredWordsCN = []string{
 }
 var flutteredWordsEN = []string{}
 
+var replyWordsCN = []string{"谢谢！", "谢谢啦！", "谢谢老师！", "谢谢🙏"}
+
 func ReplyComments() {
 	accounts := db.DefaultDB.GetAll500px()
 	for _, account := range accounts {
@@ -77,7 +75,8 @@ func ReplyComments() {
 				var replyMsg string
 				if utils.IsChineseChar(c.Message) || utils.IsChineseChar(c.UserInfo.NickName) {
 					//中文评论
-					replyMsg = "谢谢啦！"
+					n := rand.Intn(len(replyWordsCN)) //随机选择
+					replyMsg = replyWordsCN[n]
 				} else {
 					//英文评论
 					replyMsg = "thanks!"
