@@ -36,6 +36,9 @@ type Config struct {
 	Scheduler struct {
 		Px500 string
 	}
+	ServerChan struct {
+		Token string
+	}
 }
 
 func main() {

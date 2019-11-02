@@ -9,4 +9,7 @@ wechat:
   encodingAESKey: xxx
 
 scheduler:
-  500px: 30m
+  500px: 1m
+
+serverChan:
+  token: xxx

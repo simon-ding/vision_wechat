@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"vision_wechat/utils"
 )
 
 type Client struct {
@@ -98,7 +99,9 @@ func (c *Client) DoLike(id, uploadID string) error {
 	var res Response
 	_ = jsoniter.Unmarshal(data, &res)
 	if res.Status != "200" {
-		return fmt.Errorf("%s", res.Message)
+		msg := fmt.Sprintf("status: %s, %s", res.Status, res.Message)
+		utils.NotifyServerChan(msg, "")
+		return fmt.Errorf(msg)
 	}
 	return nil
 }
