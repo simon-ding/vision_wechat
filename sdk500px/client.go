@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"vision_wechat/utils"
 )
 
@@ -75,7 +76,9 @@ func (c *Client) GetPage(page int, size int) (*IndexPage, error) {
 	}
 	if indexPage.Status != "200" {
 		msg := fmt.Sprintf("status: %s, %s", indexPage.Status, indexPage.Message)
-		utils.NotifyServerChan(msg, "")
+		if strings.Contains(indexPage.Message, "login") {
+			utils.NotifyServerChan(msg, "")
+		}
 		return nil, fmt.Errorf(msg)
 	}
 	return &indexPage, nil
@@ -102,7 +105,9 @@ func (c *Client) DoLike(id, uploadID string) error {
 	_ = jsoniter.Unmarshal(data, &res)
 	if res.Status != "200" {
 		msg := fmt.Sprintf("status: %s, %s", res.Status, res.Message)
-		utils.NotifyServerChan(msg, "")
+		if strings.Contains(res.Message, "login") {
+			utils.NotifyServerChan(msg, "")
+		}
 		return fmt.Errorf(msg)
 	}
 	return nil
