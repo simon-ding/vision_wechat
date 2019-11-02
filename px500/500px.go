@@ -10,10 +10,9 @@ import (
 )
 
 func Heart500px() {
-	logrus.Info("500px scheduler begins")
+	logrus.Info("500px 点赞开始运行")
 	accounts := db.DefaultDB.GetAll500px()
 	for _, account := range accounts {
-		logrus.Info("do heart for account ", account.UserID)
 		client := sdk500px.NewClientUseCookie(account.Cookie)
 		page, err := client.GetPage(1, 30)
 		if err != nil {
@@ -44,6 +43,7 @@ var flutteredWordsEN = []string{}
 var replyWordsCN = []string{"谢谢！", "谢谢啦！", "谢谢老师！", "谢谢🙏"}
 
 func ReplyComments() {
+	logrus.Info("回复评论程序开始运行")
 	accounts := db.DefaultDB.GetAll500px()
 	for _, account := range accounts {
 		client := sdk500px.NewClientUseCookie(account.Cookie)

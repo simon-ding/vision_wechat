@@ -63,7 +63,7 @@ func main() {
 func scheduledTasks(config *Config) {
 	cr := cron.New()
 	cr.AddFunc("@every "+config.Scheduler.Px500, px500.Heart500px)
-	cr.AddFunc("@daily", px500.ReplyComments)
+	cr.AddFunc("CRON_TZ=Asia/Shanghai 30 23 * * * *", px500.ReplyComments)
 
 	cr.Start()
 }

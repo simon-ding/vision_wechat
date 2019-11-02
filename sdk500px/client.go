@@ -27,22 +27,6 @@ func NewClientUseCookie(cookie string) *Client {
 	}
 }
 
-type Page struct {
-	Data    []photoData
-	Message string
-	Status  string
-}
-type uploaderInfo struct {
-	NickName string `json:"nickName"`
-}
-
-type photoData struct {
-	ID           string `json:"id"`
-	UploaderID   string `json:"uploaderId"`
-	Title        string
-	UploaderInfo uploaderInfo `json:"uploaderInfo"`
-}
-
 type Response struct {
 	Data    interface{}
 	Message string
@@ -60,7 +44,7 @@ func (c *Client) OwnerID() string {
 	return userId.Value
 }
 
-func (c *Client) GetPage(page int, size int) (*Page, error) {
+func (c *Client) GetPage(page int, size int) (*IndexPage, error) {
 	req, err := c.newRequest("GET", "/feedflow/index", nil)
 	if err != nil {
 		return nil, err
@@ -82,16 +66,16 @@ func (c *Client) GetPage(page int, size int) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	var page1 Page
+	var indexPage IndexPage
 
-	err = jsoniter.Unmarshal(data, &page1)
+	err = jsoniter.Unmarshal(data, &indexPage)
 	if err != nil {
 		return nil, err
 	}
-	if page1.Status != "200" {
-		return nil, fmt.Errorf("%s", page1.Message)
+	if indexPage.Status != "200" {
+		return nil, fmt.Errorf("%s", indexPage.Message)
 	}
-	return &page1, nil
+	return &indexPage, nil
 }
 
 func (c *Client) DoLike(id, uploadID string) error {
@@ -135,4 +119,40 @@ func (c *Client) newRequest(method, refUrl string, body io.Reader) (*http.Reques
 	req.Header.Add("Cookie", c.Cookie)
 	req.Header.Add("User-Agent", c.userAgent)
 	return req, nil
+}
+
+func (c *Client) GetPhotoDetails(photoID string) (*PhotoDetail, error) {
+	req, err := c.newRequest("GET", "community/photo-details/"+photoID, nil)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	q := req.URL.Query()
+	q.Add("type", "json")
+	q.Add("imgsize", "p1,p2,p5,p6")
+	req.URL.RawQuery = q.Encode()
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, _ := ioutil.ReadAll(resp.Body)
+	var photoDetail PhotoDetail
+	err = jsoniter.Unmarshal(data, &photoDetail)
+	return &photoDetail, err
+}
+
+func (c *Client) DownloadPhoto(photoID string) ([]byte, error) {
+	details, err := c.GetPhotoDetails(photoID)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.Get(details.DownLoadURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	return data, err
 }
