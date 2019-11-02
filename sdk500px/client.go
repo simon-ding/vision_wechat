@@ -74,7 +74,9 @@ func (c *Client) GetPage(page int, size int) (*IndexPage, error) {
 		return nil, err
 	}
 	if indexPage.Status != "200" {
-		return nil, fmt.Errorf("%s", indexPage.Message)
+		msg := fmt.Sprintf("status: %s, %s", indexPage.Status, indexPage.Message)
+		utils.NotifyServerChan(msg, "")
+		return nil, fmt.Errorf(msg)
 	}
 	return &indexPage, nil
 }
