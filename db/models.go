@@ -55,7 +55,15 @@ func (d *DB) GetAll500px() []Account {
 	return px
 }
 func (d *DB) Set500pxCookie(openID string, cookie string) {
-	d.db.Model(&Account{}).Where("name = ?", "500px").Where("user_id = ?", openID).Update("cookie", cookie)
+	var acc Account
+	d.db.Where("name = ?", "500px").Where("user_id = ?", openID).First(&acc)
+	if acc.ID == 0 {
+		logrus.Info("用户没有登记500px账号，创建一个")
+		acc.Name = "500px"
+		acc.UserID = openID
+	}
+	acc.Cookie = cookie
+	d.db.Save(&acc)
 }
 
 func (d *DB) Migrate() {
