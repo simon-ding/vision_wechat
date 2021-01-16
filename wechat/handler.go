@@ -1,7 +1,7 @@
 package wechat
 
 import (
-	"github.com/ahmdrz/goinsta/v2"
+	"github.com/TheForgotten69/goinsta/v2"
 	"github.com/silenceper/wechat"
 	"github.com/silenceper/wechat/cache"
 	"github.com/silenceper/wechat/message"
@@ -52,10 +52,14 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 	//文本消息
 	case message.MsgTypeText:
 		if strings.HasPrefix(msg.Content, "500px") {
-			cookie := strings.TrimLeft(msg.Content, "500px")
-			cookie = strings.TrimSpace(cookie)
+			parts := strings.Split(msg.Content, " ")
+			if len(parts) < 3 {
+				return textReturn("格式错误")
+			}
+			user := strings.TrimSpace(parts[1])
+			password := strings.TrimSpace(parts[2])
 			userID := msg.FromUserName
-			db.DefaultDB.Set500pxCookie(userID, cookie)
+			db.DefaultDB.Set500pxAccount(userID, user, password)
 			return textReturn("成功设置500px cookie!")
 		}
 		return textReturn(msg.Content)
@@ -75,7 +79,7 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 			logrus.Error("login to instagram fail: ", err)
 			return textReturn("上传失败 instagram 失败！")
 		}
-		defer insta.Logout()
+		logrus.Infof("login instagram account %s success", insAccount.Username)
 		_, err = insta.UploadPhoto(resp.Body, "11", 100, 0)
 		if err != nil {
 			logrus.Error("upload to instagram error, ", err)

@@ -54,7 +54,7 @@ func (d *DB) GetAll500px() []Account {
 	d.db.Where("name = ?", "500px").Find(&px)
 	return px
 }
-func (d *DB) Set500pxCookie(openID string, cookie string) {
+func (d *DB) Set500pxAccount(openID string, username, password string) {
 	var acc Account
 	d.db.Where("name = ?", "500px").Where("user_id = ?", openID).First(&acc)
 	if acc.ID == 0 {
@@ -62,7 +62,8 @@ func (d *DB) Set500pxCookie(openID string, cookie string) {
 		acc.Name = "500px"
 		acc.UserID = openID
 	}
-	acc.Cookie = cookie
+	acc.Username = username
+	acc.Password = password
 	d.db.Save(&acc)
 }
 

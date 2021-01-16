@@ -1,31 +1,54 @@
 package sdk500px
 
 import (
+	"encoding/json"
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 	"vision_wechat/utils"
 )
 
-type Client struct {
-	Cookie    string
-	client    *http.Client
-	userAgent string
-	baseUrl   string
+const (
+	loginUrl  = "/user/v2/tologin"
+	baseUrl   = "https://500px.com.cn/"
+	userAgent = "Mozilla/5.0 (Linux; Android 10; Mi 10 Build/QKQ1.191117.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/81.0.4044.138 Mobile Safari/537.36"
+)
+
+func wrapperRequest(req *http.Request, token string) *http.Request {
+	req.Header.Add("PF500MClient", "android")
+	req.Header.Add("PF500MClientVersion", "404000")
+	req.Header.Add("PF500MClientId", "a4e84d18f3414a788a234c76aee6067f")
+	req.Header.Add("equipmentType", "Xiaomi Mi 10(Android 10)")
+	req.Header.Add("netWorkState", "WIFI")
+	req.Header.Add("User-Agent", userAgent)
+	req.Header.Add("access_token", token)
+	req.Header.Add("accessToken", token)
+	req.Header.Add("Host", "500px.com.cn")
+	return req
 }
 
-func NewClientUseCookie(cookie string) *Client {
+type Client struct {
+	client   *http.Client
+	username string
+	password string
+	token    string
+	UserId   string
+}
+
+func NewClient(username, password string) *Client {
 	return &Client{
-		Cookie:    cookie,
-		client:    http.DefaultClient,
-		userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36",
-		baseUrl:   "https://500px.me",
+		client:   http.DefaultClient,
+		username: username,
+		password: password,
 	}
 }
 
@@ -35,15 +58,78 @@ type Response struct {
 	Status  string
 }
 
-func (c *Client) OwnerID() string {
-	header := http.Header{}
-	header.Add("Cookie", c.Cookie)
-	req := http.Request{Header: header}
-	userId, err := req.Cookie("userId")
+func (c *Client) Login() error {
+	data := url.Values{}
+	data.Add("userName", c.username)
+	data.Add("password", c.password)
+	data.Add("expires", "31536000")
+
+	m := map[string]interface{}{}
+	m["expireTime"] = time.Now().UnixNano()/1000/1000 + 300000
+	m["phone"] = c.username
+	res, err := json.Marshal(m)
 	if err != nil {
-		logrus.Error(err)
+		return errors.Wrap(err, "json marshal")
 	}
-	return userId.Value
+	cipertext, err := DesEncrypt(res, key500px)
+	if err != nil {
+		return errors.Wrap(err, "des encrypt")
+	}
+	s, err := DesDecrypt(cipertext, key500px)
+	fmt.Println(string(s), err)
+	text := encodeBase64(cipertext)
+
+	fmt.Println(text)
+	//bb := decodeBase64("POSTHVWuTePIWX9K8H40kQldU/AN57bSR8CVxFLkjk/hNh2+hhgaaunvN5lAuqzT72GGLo2dOAG+uW0jLYrpAQ==")
+	//d, _ := DesDecrypt(bb, key500px)
+	//fmt.Println(string(d))
+	data.Add("secretText", text)
+
+	req, err := http.NewRequest(http.MethodPost, baseUrl+loginUrl, strings.NewReader(data.Encode()))
+	if err != nil {
+		return err
+	}
+	req = wrapperRequest(req, "")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+
+	resp, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	respData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	var user UserInfo
+	err = json.Unmarshal(respData, &user)
+	if err != nil {
+		return errors.Wrap(err, "json")
+	}
+	if user.Status != "200" {
+		return errors.New(user.Message)
+	}
+
+	c.token = user.UserAccountInfo.AccessToken
+	c.UserId = user.UserAccountInfo.UserID
+	fmt.Println(string(respData))
+	log.Print("login sucess!")
+	return nil
+}
+
+func (c *Client) TestLogin() error {
+	if c.token == "" {
+		return c.Login()
+	}
+
+	_, err := c.GetPage(1, 20)
+	if err != nil {
+		return c.Login()
+	}
+	return nil
 }
 
 func (c *Client) GetPage(page int, size int) (*IndexPage, error) {
@@ -114,7 +200,7 @@ func (c *Client) DoLike(id, uploadID string) error {
 }
 
 func (c *Client) newRequest(method, refUrl string, body io.Reader) (*http.Request, error) {
-	baseUrl, err := url.Parse(c.baseUrl)
+	baseUrl, err := url.Parse(baseUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +212,9 @@ func (c *Client) newRequest(method, refUrl string, body io.Reader) (*http.Reques
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Cookie", c.Cookie)
-	req.Header.Add("User-Agent", c.userAgent)
+	req = wrapperRequest(req, c.token)
+	//req.Header.Add("Cookie", c.Cookie)
+	//req.Header.Add("User-Agent", c.userAgent)
 	return req, nil
 }
 

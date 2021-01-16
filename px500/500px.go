@@ -9,11 +9,22 @@ import (
 	"vision_wechat/utils"
 )
 
+var m = make(map[string]*sdk500px.Client)
+
 func Heart500px() {
 	logrus.Info("500px 点赞开始运行")
 	accounts := db.DefaultDB.GetAll500px()
 	for _, account := range accounts {
-		client := sdk500px.NewClientUseCookie(account.Cookie)
+		client, ok := m[account.UserID]
+		if !ok {
+			client = sdk500px.NewClient(account.Username, account.Password)
+			m[account.UserID] = client
+		}
+		err := client.TestLogin()
+		if err != nil {
+			logrus.Errorf("login error %s", err)
+			continue
+		}
 		page, err := client.GetPage(1, 30)
 		if err != nil {
 			logrus.Error(err)
@@ -26,7 +37,7 @@ func Heart500px() {
 				continue
 			}
 			logrus.Infof("成功点赞了 %s 的作品 %s", photo.UploaderInfo.NickName, photo.Title)
-			time.Sleep(5 * time.Second)
+			time.Sleep(10 * time.Second)
 		}
 	}
 }
@@ -46,8 +57,18 @@ func ReplyComments() {
 	logrus.Info("回复评论程序开始运行")
 	accounts := db.DefaultDB.GetAll500px()
 	for _, account := range accounts {
-		client := sdk500px.NewClientUseCookie(account.Cookie)
-		userId := client.OwnerID()
+		client, ok := m[account.UserID]
+		if !ok {
+			client = sdk500px.NewClient(account.Username, account.Password)
+			m[account.UserID] = client
+		}
+		err := client.TestLogin()
+		if err != nil {
+			logrus.Errorf("login error %s", err)
+			continue
+		}
+
+		userId := client.UserId
 		gallery, err := client.FetchGallery(userId, 1, 20)
 		if err != nil {
 			logrus.Error(err)
@@ -88,7 +109,7 @@ func ReplyComments() {
 					logrus.Infof("成功回复 %s 的评论！", c.UserInfo.NickName)
 				}
 				//避免回复太快
-				time.Sleep(5 * time.Second)
+				time.Sleep(10 * time.Second)
 			}
 		}
 	}
