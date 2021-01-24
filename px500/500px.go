@@ -67,6 +67,10 @@ func Upload2Instagram(duration time.Duration) func() {
 			}
 
 			insAccount := db.DefaultDB.GetInstagram(account.UserID)
+			if insAccount.Username == "" {
+				logrus.Infof("user %s has no ins account", account.UserID)
+				continue
+			}
 			logrus.Infof("%d: instagram account: %v", i, insAccount)
 			insta := goinsta.New(insAccount.Username, insAccount.Password)
 			err = insta.Login()
