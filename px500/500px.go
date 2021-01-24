@@ -5,6 +5,7 @@ import (
 	"github.com/TheForgotten69/goinsta/v2"
 	"github.com/sirupsen/logrus"
 	"math/rand"
+	"path/filepath"
 	"time"
 	"vision_wechat/db"
 	"vision_wechat/sdk500px"
@@ -73,8 +74,9 @@ func Upload2Instagram(duration time.Duration) func() {
 				logrus.Error(err)
 				continue
 			}
+			path := filepath.Join("/wechat/data", account.UserID)
 
-			insta, err := goinsta.Import(account.UserID)
+			insta, err := goinsta.Import(path)
 			if err != nil {
 				insta = goinsta.New(insAccount.Username, insAccount.Password)
 				err = insta.Login()
@@ -83,7 +85,7 @@ func Upload2Instagram(duration time.Duration) func() {
 					continue
 				}
 				logrus.Infof("login instagram account %s success", insAccount.Username)
-				err := insta.Export(account.UserID)
+				err := insta.Export(path)
 				if err != nil {
 					logrus.Errorf("export ins: %v", err)
 					continue
