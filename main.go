@@ -72,7 +72,7 @@ func scheduledTasks(config *Config) {
 	_, err = cr.AddFunc("@daily", px500.ReplyComments)
 	logrus.Errorf("add ReplyComments %v", err)
 
-	_, err = cr.AddFunc("@every 5m", px500.Upload2Instagram(time.Hour*24))
+	_, err = cr.AddFunc("@every 20m", px500.Upload2Instagram(time.Minute*20))
 	logrus.Errorf("add Upload2Instagram %v", err)
 
 	cr.Start()
