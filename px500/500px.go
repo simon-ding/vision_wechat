@@ -74,13 +74,18 @@ func Upload2Instagram(duration time.Duration) func() {
 				continue
 			}
 
-			insta := goinsta.New(insAccount.Username, insAccount.Password)
-			err = insta.Login()
+			insta, err := goinsta.Import(account.UserID)
 			if err != nil {
-				logrus.Error("login to instagram fail: ", err)
-				return
+				insta = goinsta.New(insAccount.Username, insAccount.Password)
+				err = insta.Login()
+				if err != nil {
+					logrus.Error("login to instagram fail: ", err)
+					return
+				}
+				logrus.Infof("login instagram account %s success", insAccount.Username)
+				err := insta.Export(account.UserID)
+				logrus.Info("export ins: %v", err)
 			}
-			logrus.Infof("login instagram account %s success", insAccount.Username)
 
 			for _, p := range g.Data {
 				t := time.Unix(p.CreatedTime/1000, 0)
