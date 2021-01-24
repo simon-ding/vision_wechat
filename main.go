@@ -67,18 +67,13 @@ func main() {
 func scheduledTasks(config *Config) {
 	cr := cron.New()
 	_, err := cr.AddFunc("@every "+config.Scheduler.Px500, px500.Heart500px)
-	if err != nil {
-		logrus.Errorf("doLike %v", err)
-	}
+	logrus.Errorf("add doLike %v", err)
+
 	_, err = cr.AddFunc("@daily", px500.ReplyComments)
-	if err != nil {
-		logrus.Errorf("ReplyComments %v", err)
-	}
+	logrus.Errorf("add ReplyComments %v", err)
 
 	_, err = cr.AddFunc("@every 5m", px500.Upload2Instagram(time.Hour*24))
-	if err != nil {
-		logrus.Errorf("Upload2Instagram %v", err)
-	}
+	logrus.Errorf("add Upload2Instagram %v", err)
 
 	cr.Start()
 }

@@ -187,10 +187,10 @@ type PhotoDetail struct {
 		UserType              int    `json:"userType"`
 		UserFollowedState     bool   `json:"userFollowedState"`
 	} `json:"uploaderInfo"`
-	UserPictureTechnicaledCount   int    `json:"userPictureTechnicaledCount"`
-	UserPictureShareState         bool   `json:"userPictureShareState"`
-	ProfileSortTime               int64  `json:"profileSortTime"`
-	Timestamp                     bool   `json:"timestamp"`
+	UserPictureTechnicaledCount int   `json:"userPictureTechnicaledCount"`
+	UserPictureShareState       bool  `json:"userPictureShareState"`
+	ProfileSortTime             int64 `json:"profileSortTime"`
+	//Timestamp                     bool   `json:"timestamp"`
 	HasCover                      int    `json:"hasCover"`
 	OpenState                     string `json:"openState"`
 	UserPicturePutupedCount       int    `json:"userPicturePutupedCount"`
