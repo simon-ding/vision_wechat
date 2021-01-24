@@ -48,8 +48,8 @@ func Upload2Instagram(duration time.Duration) func() {
 	return func() {
 		logrus.Errorf("instagram photo syncing begin...")
 		accounts := db.DefaultDB.GetAll500px()
-		for _, account := range accounts {
-			logrus.Info("500px account: ", account)
+		for i, account := range accounts {
+			logrus.Infof("%d: 500px account: %v", i, account)
 			client, ok := m[account.UserID]
 			if !ok {
 				client = sdk500px.NewClient(account.Username, account.Password)
@@ -67,7 +67,7 @@ func Upload2Instagram(duration time.Duration) func() {
 			}
 
 			insAccount := db.DefaultDB.GetInstagram(account.UserID)
-			logrus.Info("instagram account: ", insAccount)
+			logrus.Infof("%d: instagram account: %v", i, insAccount)
 			insta := goinsta.New(insAccount.Username, insAccount.Password)
 			err = insta.Login()
 			if err != nil {
@@ -98,7 +98,7 @@ func Upload2Instagram(duration time.Duration) func() {
 					logrus.Errorf("upload to instagram error: %v", err)
 					continue
 				}
-
+				logrus.Info("upload instagram done")
 			}
 		}
 	}
