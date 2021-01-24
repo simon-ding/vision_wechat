@@ -239,12 +239,8 @@ func (c *Client) GetPhotoDetails(photoID string) (*PhotoDetail, error) {
 	return &photoDetail, err
 }
 
-func (c *Client) DownloadPhoto(photoID string) ([]byte, error) {
-	details, err := c.GetPhotoDetails(photoID)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := http.Get(details.DownLoadURL)
+func (c *Client) DownloadPhoto(downLoadURL string) ([]byte, error) {
+	resp, err := c.client.Get(downLoadURL)
 	if err != nil {
 		return nil, err
 	}
