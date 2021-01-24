@@ -1,6 +1,8 @@
 package px500
 
 import (
+	"bytes"
+	"github.com/TheForgotten69/goinsta/v2"
 	"github.com/sirupsen/logrus"
 	"math/rand"
 	"time"
@@ -40,6 +42,65 @@ func Heart500px() {
 			time.Sleep(10 * time.Second)
 		}
 	}
+}
+
+func Upload2Instagram(duration time.Duration) func() {
+	return func() {
+		logrus.Errorf("instagram photo syncing begin...")
+		accounts := db.DefaultDB.GetAll500px()
+		for _, account := range accounts {
+			client, ok := m[account.UserID]
+			if !ok {
+				client = sdk500px.NewClient(account.Username, account.Password)
+				m[account.UserID] = client
+			}
+			err := client.TestLogin()
+			if err != nil {
+				logrus.Errorf("login error %s", err)
+				continue
+			}
+			g, err := client.FetchGallery(client.UserId, 1, 20)
+			if err != nil {
+				logrus.Error(err)
+				continue
+			}
+
+			insAccount := db.DefaultDB.GetInstagram(account.UserID)
+			insta := goinsta.New(insAccount.Username, insAccount.Password)
+			err = insta.Login()
+			if err != nil {
+				logrus.Error("login to instagram fail: ", err)
+				return
+			}
+			logrus.Infof("login instagram account %s success", insAccount.Username)
+
+			for _, p := range g.Data {
+				t := time.Unix(p.CreatedTime/1000, 0)
+				if time.Now().Sub(t) > duration {
+					continue
+				}
+				logrus.Infof("begin uploading image %s to instagram", p.Title)
+
+				detail, err := client.GetPhotoDetails(p.ID)
+				if err != nil {
+					logrus.Errorf("get photo %s error: %v", p.Title, err)
+					continue
+				}
+				data, err := client.DownloadPhoto(detail.DownLoadURL)
+				if err != nil {
+					logrus.Errorf("%v", err)
+					continue
+				}
+				_, err = insta.UploadPhoto(bytes.NewReader(data), "11", 100, 0)
+				if err != nil {
+					logrus.Errorf("upload to instagram error: %v", err)
+					continue
+				}
+
+			}
+		}
+	}
+
 }
 
 var flutteredWordsCN = []string{

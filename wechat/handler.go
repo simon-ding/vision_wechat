@@ -60,8 +60,21 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 			password := strings.TrimSpace(parts[2])
 			userID := msg.FromUserName
 			db.DefaultDB.Set500pxAccount(userID, user, password)
-			return textReturn("成功设置500px cookie!")
+			return textReturn("成功设置 500px 账号!")
 		}
+
+		if strings.HasPrefix(msg.Content, "instagram") {
+			parts := strings.Split(msg.Content, " ")
+			if len(parts) < 3 {
+				return textReturn("格式错误")
+			}
+			user := strings.TrimSpace(parts[1])
+			password := strings.TrimSpace(parts[2])
+			userID := msg.FromUserName
+			db.DefaultDB.SetInstagrammAccount(userID, user, password)
+			return textReturn("成功设置 instagram 账号!")
+		}
+
 		return textReturn(msg.Content)
 
 		//图片消息
@@ -111,7 +124,7 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 	case message.MsgTypeEvent:
 
 	}
-	return nil
+	return textReturn("暂不支持")
 }
 
 func textReturn(content string) *message.Reply {

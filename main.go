@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"net/http"
+	"time"
 	db2 "vision_wechat/db"
 	"vision_wechat/px500"
 	"vision_wechat/wechat"
@@ -67,6 +68,7 @@ func scheduledTasks(config *Config) {
 	cr := cron.New()
 	cr.AddFunc("@every "+config.Scheduler.Px500, px500.Heart500px)
 	cr.AddFunc("@daily", px500.ReplyComments)
+	cr.AddFunc("@every 5min", px500.Upload2Instagram(time.Hour*24))
 
 	cr.Start()
 }

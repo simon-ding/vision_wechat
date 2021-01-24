@@ -17,6 +17,12 @@ type Account struct {
 	Cookie   string
 }
 
+type Photo struct {
+	gorm.Model
+	AccountId uint
+	PhotoId   string
+}
+
 //var DB *gorm.DB
 
 type DB struct {
@@ -67,6 +73,19 @@ func (d *DB) Set500pxAccount(openID string, username, password string) {
 	d.db.Save(&acc)
 }
 
+func (d *DB) SetInstagrammAccount(openID string, username, password string) {
+	var acc Account
+	d.db.Where("name = ?", "instagram").Where("user_id = ?", openID).First(&acc)
+	if acc.ID == 0 {
+		logrus.Info("用户没有登记instagram账号，创建一个")
+		acc.Name = "instagram"
+		acc.UserID = openID
+	}
+	acc.Username = username
+	acc.Password = password
+	d.db.Save(&acc)
+}
+
 func (d *DB) Migrate() {
-	d.db.AutoMigrate(&Account{})
+	d.db.AutoMigrate(&Account{}, &Photo{})
 }
