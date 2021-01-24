@@ -1,7 +1,6 @@
 package wechat
 
 import (
-	"github.com/TheForgotten69/goinsta/v2"
 	"github.com/silenceper/wechat"
 	"github.com/silenceper/wechat/cache"
 	"github.com/silenceper/wechat/message"
@@ -79,26 +78,26 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 
 		//图片消息
 	case message.MsgTypeImage:
-		imgURL := msg.PicURL
-		resp, err := http.Get(imgURL)
-		if err != nil {
-			logrus.Error("download pic error: ", err)
-			return textReturn("上传失败 instagram 失败！")
-		}
-		insAccount := db.DefaultDB.GetInstagram(msg.FromUserName)
-		insta := goinsta.New(insAccount.Username, insAccount.Password)
-		err = insta.Login()
-		if err != nil {
-			logrus.Error("login to instagram fail: ", err)
-			return textReturn("上传失败 instagram 失败！")
-		}
-		logrus.Infof("login instagram account %s success", insAccount.Username)
-		_, err = insta.UploadPhoto(resp.Body, "11", 100, 0)
-		if err != nil {
-			logrus.Error("upload to instagram error, ", err)
-			return textReturn("上传失败 instagram 失败！")
-		}
-		return textReturn("上传成功！")
+		//imgURL := msg.PicURL
+		//resp, err := http.Get(imgURL)
+		//if err != nil {
+		//	logrus.Error("download pic error: ", err)
+		//	return textReturn("上传失败 instagram 失败！")
+		//}
+		//insAccount := db.DefaultDB.GetInstagram(msg.FromUserName)
+		//insta := goinsta.New(insAccount.Username, insAccount.Password)
+		//err = insta.Login()
+		//if err != nil {
+		//	logrus.Error("login to instagram fail: ", err)
+		//	return textReturn("上传失败 instagram 失败！")
+		//}
+		//logrus.Infof("login instagram account %s success", insAccount.Username)
+		//_, err = insta.UploadPhoto(resp.Body, "11", 100, 0)
+		//if err != nil {
+		//	logrus.Error("upload to instagram error, ", err)
+		//	return textReturn("上传失败 instagram 失败！")
+		//}
+		//return textReturn("上传成功！")
 
 		//语音消息
 	case message.MsgTypeVoice:
