@@ -50,6 +50,14 @@ func Upload2Instagram(duration time.Duration) func() {
 		accounts := db.DefaultDB.GetAll500px()
 		for i, account := range accounts {
 			logrus.Infof("%d: 500px account: %v", i, account)
+
+			insAccount := db.DefaultDB.GetInstagram(account.UserID)
+			if insAccount.Username == "" {
+				logrus.Infof("user %s has no ins account", account.UserID)
+				continue
+			}
+			logrus.Infof("%d: instagram account: %v", i, insAccount)
+
 			client, ok := m[account.UserID]
 			if !ok {
 				client = sdk500px.NewClient(account.Username, account.Password)
@@ -66,12 +74,6 @@ func Upload2Instagram(duration time.Duration) func() {
 				continue
 			}
 
-			insAccount := db.DefaultDB.GetInstagram(account.UserID)
-			if insAccount.Username == "" {
-				logrus.Infof("user %s has no ins account", account.UserID)
-				continue
-			}
-			logrus.Infof("%d: instagram account: %v", i, insAccount)
 			insta := goinsta.New(insAccount.Username, insAccount.Password)
 			err = insta.Login()
 			if err != nil {
