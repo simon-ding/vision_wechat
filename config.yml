@@ -1,6 +1,6 @@
 server:
   port: 8080
-  dataDir: ./data
+  dataDir: .
 
 wechat:
   token: xxx

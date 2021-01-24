@@ -7,7 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
+	"time"
 	"vision_wechat/db"
+	"vision_wechat/px500"
 )
 
 type Client struct {
@@ -72,6 +74,19 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 			userID := msg.FromUserName
 			db.DefaultDB.SetInstagrammAccount(userID, user, password)
 			return textReturn("成功设置 instagram 账号!")
+		}
+
+		if strings.HasPrefix(msg.Content, "run") {
+			cmd := strings.Split(msg.Content, " ")
+			if len(cmd) < 2 {
+				return textReturn("格式错误")
+			}
+			switch cmd[1] {
+			case "syncing":
+				px500.Upload2Instagram(time.Hour * 24)()
+
+			}
+
 		}
 
 		return textReturn(msg.Content)
