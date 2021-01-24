@@ -83,9 +83,10 @@ func messageHandler(msg message.MixMessage) *message.Reply {
 			}
 			switch cmd[1] {
 			case "syncing":
-				px500.Upload2Instagram(time.Hour * 24)()
+				go px500.Upload2Instagram(time.Hour * 24)()
 
 			}
+			return textReturn("success")
 
 		}
 
